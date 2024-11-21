@@ -23,5 +23,10 @@
         "latitude": 21.0323,
         "longitude": 95.8007,
         "potholes": 5
+    },
+    {
+        "latitude": 21.0323,
+        "longitude": 99.8007,
+        "potholes": 5
     }
 ]
