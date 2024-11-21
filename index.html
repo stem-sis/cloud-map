@@ -1,54 +1,51 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Map with Current Location</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <title>Cloud Map</title>
+    <script>
+        // Tự động tải lại trang sau mỗi 10 giây
+        setTimeout(function(){
+            location.reload();
+        }, 10000); // 10000 ms = 10 seconds
+    </script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
         #map {
             height: 100vh;
-            width: 100%;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
-    <script>
-        // Initialize the map
-        const map = L.map('map').setView([20.0, 105.0], 13); // Default to Vietnam
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
-        // Add OpenStreetMap tiles
+    <script>
+        // Tạo bản đồ
+        var map = L.map('map').setView([21.0285, 105.8542], 13); // Vị trí mặc định là Hà Nội
+
+        // Thêm tile layer vào bản đồ
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Get current location and set marker
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
+        // Lấy dữ liệu từ file locations.json
+        $.getJSON('locations.json', function(data) {
+            data.locations.forEach(function(location) {
+                var lat = location.latitude;
+                var lon = location.longitude;
+                var label = location.label;
 
-                    // Set map view to current location
-                    map.setView([lat, lng], 13);
-
-                    // Add marker to current location
-                    L.marker([lat, lng]).addTo(map)
-                        .bindPopup('You are here!')
-                        .openPopup();
-                },
-                (error) => {
-                    console.error('Error getting location:', error);
-                    alert('Unable to retrieve your location.');
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by this browser.');
-        }
+                // Thêm marker vào bản đồ cho mỗi vị trí
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup(label);
+            });
+        });
     </script>
 </body>
 </html>
