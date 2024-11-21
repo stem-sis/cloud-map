@@ -3,87 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pothole Detection Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <title>Pothole Map</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <style>
-        #map { height: 500px; }
-        #control-buttons { margin-top: 10px; }
+        #map {
+            height: 100vh;
+        }
+        .button-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        button {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
-    <h1>Pothole Detection Map</h1>
+    <div class="button-container">
+        <button id="clearAll">Clear All Locations</button>
+    </div>
     <div id="map"></div>
 
-    <div id="control-buttons">
-        <button onclick="clearAllLocations()">Clear All Locations</button>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        var map = L.map('map').setView([21.0323, 105.8007], 13);  // Default map center and zoom level
+        // Create map
+        const map = L.map('map').setView([21.0323, 105.8007], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-        // Thiết lập tile layer của bản đồ
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // Fetch and display locations
+        let markers = [];
+        async function fetchLocations() {
+            try {
+                const response = await fetch('/locations.json'); // Fetch from the server
+                const locations = await response.json();
 
-        // Mảng lưu trữ các markers
-        var markers = [];
+                // Clear existing markers
+                markers.forEach(marker => map.removeLayer(marker));
+                markers = [];
 
-        // Hàm để cập nhật các markers trên bản đồ
-        function loadLocations() {
-            fetch('http://localhost:3000/locations')  // Gọi API để lấy dữ liệu locations từ server
-                .then(response => response.json())
-                .then(locations => {
-                    locations.forEach(location => {
-                        addLocationToMap(location);
-                    });
+                // Add new markers
+                locations.forEach(location => {
+                    const marker = L.marker([location.latitude, location.longitude])
+                        .addTo(map)
+                        .bindPopup(`Potholes: ${location.potholes}`);
+                    markers.push(marker);
                 });
+            } catch (error) {
+                console.error('Error fetching locations:', error);
+            }
         }
 
-        // Hàm để thêm location vào bản đồ
-        function addLocationToMap(location) {
-            var marker = L.marker([location.latitude, location.longitude]).addTo(map);
-            marker.bindPopup("Potholes detected: " + location.potholes);
-            marker.on('click', function() {
-                removeLocation(location.latitude, location.longitude);
-            });
-            markers.push(marker);
-        }
+        // Clear all locations button
+        document.getElementById('clearAll').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/clear-all', { method: 'POST' }); // Trigger clear on the server
+                if (response.ok) {
+                    alert('All locations cleared successfully!');
+                    fetchLocations(); // Refresh the map
+                } else {
+                    alert('Failed to clear locations.');
+                }
+            } catch (error) {
+                console.error('Error clearing locations:', error);
+            }
+        });
 
-        // Hàm xóa location trên bản đồ và từ server
-        function removeLocation(latitude, longitude) {
-            fetch('http://localhost:3000/locations', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ latitude: latitude, longitude: longitude })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message);  // Hiển thị thông báo từ server
-                markers = markers.filter(marker => {
-                    if (marker.getLatLng().lat === latitude && marker.getLatLng().lng === longitude) {
-                        map.removeLayer(marker);  // Xóa marker khỏi bản đồ
-                        return false;
-                    }
-                    return true;
-                });
-            });
-        }
-
-        // Hàm xóa tất cả locations
-        function clearAllLocations() {
-            markers.forEach(marker => map.removeLayer(marker));  // Xóa tất cả markers
-            markers = [];
-            fetch('http://localhost:3000/locations/clear', { method: 'DELETE' })  // Xóa tất cả locations từ server
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data.message);
-                });
-        }
-
-        // Gọi loadLocations để tải các locations từ server và hiển thị lên bản đồ
-        loadLocations();
+        // Update map every 5 seconds
+        setInterval(fetchLocations, 5000);
+        fetchLocations(); // Initial load
     </script>
 </body>
 </html>
