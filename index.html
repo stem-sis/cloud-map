@@ -35,37 +35,48 @@
         }).addTo(map);
 
         var markers = []; // Array to store the markers for easy removal
+        var lastFetchedData = []; // To store the last fetched data
 
         // Function to load locations data from locations.json
         function loadLocations() {
+            $.getJSON('locations.json', function(data) {
+                // Compare the new data with the last fetched data to check for changes
+                if (JSON.stringify(data) !== JSON.stringify(lastFetchedData)) {
+                    // If there are changes, update the markers
+                    updateMapWithNewData(data);
+                    lastFetchedData = data; // Update the last fetched data
+                }
+            });
+        }
+
+        // Function to update the map with new location data
+        function updateMapWithNewData(data) {
             // Clear existing markers
             markers.forEach(function(marker) {
                 map.removeLayer(marker);
             });
             markers = []; // Reset markers array
 
-            // Fetch the locations data from the JSON file
-            $.getJSON('locations.json', function(data) {
-                data.forEach(function(location) {
-                    var lat = location.latitude;
-                    var lon = location.longitude;
-                    var potholes = location.potholes;
+            // Add new markers
+            data.forEach(function(location) {
+                var lat = location.latitude;
+                var lon = location.longitude;
+                var potholes = location.potholes;
 
-                    // Create a marker for each location
-                    var marker = L.marker([lat, lon]).addTo(map);
-                    
-                    // Bind a popup with pothole count and coordinates
-                    marker.bindPopup("<b>Potholes Detected: </b>" + potholes + "<br><b>Location: </b>" + lat + ", " + lon);
+                // Create a marker for each location
+                var marker = L.marker([lat, lon]).addTo(map);
+                
+                // Bind a popup with pothole count and coordinates
+                marker.bindPopup("<b>Potholes Detected: </b>" + potholes + "<br><b>Location: </b>" + lat + ", " + lon);
 
-                    // Store the marker to remove later
-                    markers.push(marker);
-                });
+                // Store the marker to remove later
+                markers.push(marker);
             });
         }
 
         // Load locations data when the page loads
         $(document).ready(function() {
-            loadLocations();
+            loadLocations(); // Initial load of locations
 
             // Set up a timer to reload locations every 5 seconds
             setInterval(loadLocations, 5000);
