@@ -40,12 +40,14 @@
         // Function to load locations data from locations.json
         function loadLocations() {
             $.getJSON('locations.json', function(data) {
-                // Compare the new data with the last fetched data to check for changes
+                // Check if the data has changed before updating the map
                 if (JSON.stringify(data) !== JSON.stringify(lastFetchedData)) {
-                    // If there are changes, update the markers
+                    // If there is new data, update the map
                     updateMapWithNewData(data);
                     lastFetchedData = data; // Update the last fetched data
                 }
+            }).fail(function() {
+                console.error("Error fetching locations.json");
             });
         }
 
