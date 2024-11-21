@@ -3,49 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Map</title>
-    <script>
-        // Tự động tải lại trang sau mỗi 10 giây
-        setTimeout(function(){
-            location.reload();
-        }, 10000); // 10000 ms = 10 seconds
-    </script>
+    <title>Pothole Detection Map</title>
+
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
         #map {
-            height: 100vh;
+            width: 100%;
+            height: 500px;
         }
     </style>
 </head>
 <body>
+    <h1>Pothole Detection Locations</h1>
+
+    <!-- Map Container -->
     <div id="map"></div>
+
+    <!-- Load JSON data and create markers -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
     <script>
-        // Tạo bản đồ
-        var map = L.map('map').setView([21.0285, 105.8542], 13); // Vị trí mặc định là Hà Nội
+        // Initialize the map
+        var map = L.map('map').setView([21.0323, 105.8007], 13); // Start at an example location
 
-        // Thêm tile layer vào bản đồ
+        // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Lấy dữ liệu từ file locations.json
-        $.getJSON('locations.json', function(data) {
-            data.locations.forEach(function(location) {
-                var lat = location.latitude;
-                var lon = location.longitude;
-                var label = location.label;
+        // Store the markers globally to update them later
+        var markers = [];
 
-                // Thêm marker vào bản đồ cho mỗi vị trí
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup(label);
+        // Function to load locations data from locations.json
+        function loadLocations() {
+            $.getJSON('locations.json', function(data) {
+                // Remove existing markers from the map
+                markers.forEach(function(marker) {
+                    map.removeLayer(marker);
+                });
+
+                // Clear the markers array
+                markers = [];
+
+                // Add new markers based on the updated data
+                data.forEach(function(location) {
+                    var lat = location.latitude;
+                    var lon = location.longitude;
+                    var potholes = location.potholes;
+
+                    // Create a marker for each location
+                    var marker = L.marker([lat, lon]).addTo(map);
+                    
+                    // Bind a popup with pothole count
+                    marker.bindPopup("<b>Potholes Detected: </b>" + potholes + "<br><b>Location: </b>" + lat + ", " + lon);
+
+                    // Store the marker in the markers array
+                    markers.push(marker);
+                });
             });
-        });
+        }
+
+        // Load locations data initially
+        loadLocations();
+
+        // Update locations data every 5 seconds
+        setInterval(loadLocations, 5000);
+
     </script>
 </body>
 </html>
