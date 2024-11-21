@@ -3,38 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Map for STEM SIS</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <title>Cloud Map</title>
+    <script>
+        // Tự động tải lại trang sau mỗi 10 giây
+        setTimeout(function(){
+            location.reload();
+        }, 10000); // 10000 ms = 10 seconds
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 100vh;
+        }
+    </style>
 </head>
 <body>
-    <h1>Cloud Map for STEM SIS</h1>
-    <div id="map" style="width: 100%; height: 600px;"></div>
+    <div id="map"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
     <script>
-        // Khởi tạo bản đồ
-        var map = L.map('map').setView([20.998, 105.260], 6); // Tọa độ khởi tạo là Hà Nội, zoom level 6
+        // Tạo bản đồ
+        var map = L.map('map').setView([21.0285, 105.8542], 13); // Vị trí mặc định là Hà Nội
 
-        // Thêm tile layer cho bản đồ
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // Thêm tile layer vào bản đồ
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-        // Hàm để thêm các điểm đánh dấu từ tệp locations.json
-        function loadLocations() {
-            fetch('locations.json')
-                .then(response => response.json())
-                .then(data => {
-                    data.locations.forEach(location => {
-                        L.marker([location.lat, location.lng])
-                            .addTo(map)
-                            .bindPopup(`<b>${location.name}</b><br />${location.description}`)
-                            .openPopup();
-                    });
-                })
-                .catch(error => console.error('Error loading locations:', error));
-        }
+        // Lấy dữ liệu từ file locations.json
+        $.getJSON('locations.json', function(data) {
+            data.locations.forEach(function(location) {
+                var lat = location.latitude;
+                var lon = location.longitude;
+                var label = location.label;
 
-        // Tải và hiển thị các điểm đánh dấu
-        loadLocations();
+                // Thêm marker vào bản đồ cho mỗi vị trí
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup(label);
+            });
+        });
     </script>
 </body>
 </html>
