@@ -2,6 +2,11 @@
     {
         "latitude": 21.0323,
         "longitude": 105.8007,
+        "potholes": 3
+    },
+    {
+        "latitude": 21.0350,
+        "longitude": 105.8050,
         "potholes": 2
     }
 ]
