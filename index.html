@@ -31,12 +31,27 @@
                 const response = await fetch('/locations.json'); // Fetch file locations.json từ server
                 const locations = await response.json();
 
+                // Xử lý dữ liệu: Gộp các potholes tại cùng tọa độ
+                const aggregatedData = {};
+                locations.forEach(location => {
+                    const key = `${location.latitude},${location.longitude}`;
+                    if (aggregatedData[key]) {
+                        aggregatedData[key].potholes += location.potholes;
+                    } else {
+                        aggregatedData[key] = {
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                            potholes: location.potholes
+                        };
+                    }
+                });
+
                 // Xóa các marker cũ
                 markers.forEach(marker => map.removeLayer(marker));
                 markers = [];
 
                 // Thêm marker mới vào bản đồ
-                locations.forEach(location => {
+                Object.values(aggregatedData).forEach(location => {
                     const marker = L.marker([location.latitude, location.longitude])
                         .addTo(map)
                         .bindPopup(`Potholes detected: ${location.potholes}`);
