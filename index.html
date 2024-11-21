@@ -13,10 +13,24 @@
             width: 100%;
             height: 500px;
         }
+
+        #controls {
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Pothole Detection Locations</h1>
+
+    <div id="controls">
+        <!-- Button to clear all locations -->
+        <button id="clearAllBtn">Clear All Locations</button>
+    </div>
 
     <!-- Map Container -->
     <div id="map"></div>
@@ -34,7 +48,7 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Store the markers globally to update them later
+        // Store the markers globally to update or remove them later
         var markers = [];
 
         // Function to load locations data from locations.json
@@ -57,8 +71,13 @@
                     // Create a marker for each location
                     var marker = L.marker([lat, lon]).addTo(map);
                     
-                    // Bind a popup with pothole count
+                    // Bind a popup with pothole count and location
                     marker.bindPopup("<b>Potholes Detected: </b>" + potholes + "<br><b>Location: </b>" + lat + ", " + lon);
+
+                    // Add click event to remove marker when clicked
+                    marker.on('click', function() {
+                        removeLocation(lat, lon);
+                    });
 
                     // Store the marker in the markers array
                     markers.push(marker);
@@ -71,6 +90,43 @@
 
         // Update locations data every 5 seconds
         setInterval(loadLocations, 5000);
+
+        // Function to remove a specific location from markers array and map
+        function removeLocation(latitude, longitude) {
+            // Find the marker corresponding to this location
+            markers.forEach(function(marker, index) {
+                if (marker.getLatLng().lat === latitude && marker.getLatLng().lng === longitude) {
+                    // Remove the marker from the map
+                    map.removeLayer(marker);
+                    // Remove it from the markers array
+                    markers.splice(index, 1);
+
+                    // Update the locations.json or backend system to remove this location
+                    // In a real app, you would need to send an update request to the server here.
+                    console.log('Location removed: ', latitude, longitude);
+                }
+            });
+        }
+
+        // Function to clear all locations from the map
+        function clearAllLocations() {
+            // Remove all markers from the map
+            markers.forEach(function(marker) {
+                map.removeLayer(marker);
+            });
+
+            // Clear the markers array
+            markers = [];
+
+            // Update the locations.json or backend system to clear all locations
+            // In a real app, you would need to send an update request to the server here.
+            console.log('All locations cleared');
+        }
+
+        // Event listener for 'Clear All Locations' button
+        document.getElementById('clearAllBtn').addEventListener('click', function() {
+            clearAllLocations();
+        });
 
     </script>
 </body>
