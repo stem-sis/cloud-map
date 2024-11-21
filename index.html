@@ -10,55 +10,36 @@
         #map {
             height: 100vh;
         }
-        .button-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-        }
-        button {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
-    <div class="button-container">
-        <button id="clearAll">Clear All Locations</button>
-    </div>
     <div id="map"></div>
 
     <script>
-        // Create map
+        // Tạo bản đồ
         const map = L.map('map').setView([21.0323, 105.8007], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Fetch and display locations
+        // Tạo danh sách marker
         let markers = [];
+
+        // Hàm tải và hiển thị các vị trí từ file locations.json
         async function fetchLocations() {
             try {
-                const response = await fetch('/locations.json'); // Fetch from the server
+                const response = await fetch('/locations.json'); // Fetch file locations.json từ server
                 const locations = await response.json();
 
-                // Clear existing markers
+                // Xóa các marker cũ
                 markers.forEach(marker => map.removeLayer(marker));
                 markers = [];
 
-                // Add new markers
+                // Thêm marker mới vào bản đồ
                 locations.forEach(location => {
                     const marker = L.marker([location.latitude, location.longitude])
                         .addTo(map)
-                        .bindPopup(`Potholes: ${location.potholes}`);
+                        .bindPopup(`Potholes detected: ${location.potholes}`);
                     markers.push(marker);
                 });
             } catch (error) {
@@ -66,24 +47,9 @@
             }
         }
 
-        // Clear all locations button
-        document.getElementById('clearAll').addEventListener('click', async () => {
-            try {
-                const response = await fetch('/clear-all', { method: 'POST' }); // Trigger clear on the server
-                if (response.ok) {
-                    alert('All locations cleared successfully!');
-                    fetchLocations(); // Refresh the map
-                } else {
-                    alert('Failed to clear locations.');
-                }
-            } catch (error) {
-                console.error('Error clearing locations:', error);
-            }
-        });
-
-        // Update map every 5 seconds
+        // Tải dữ liệu ban đầu và cập nhật mỗi 5 giây
         setInterval(fetchLocations, 5000);
-        fetchLocations(); // Initial load
+        fetchLocations();
     </script>
 </body>
 </html>
