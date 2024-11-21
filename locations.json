@@ -1,35 +1,12 @@
-
-{
-    "locations": [
-        {
-            "name": "Hà Nội",
-            "lat": 20.998,
-            "lng": 105.260,
-            "description": "Thủ đô của Việt Nam, trung tâm chính trị và văn hóa."
-        },
-        {
-            "name": "TP. Hồ Chí Minh",
-            "lat": 10.823,
-            "lng": 106.629,
-            "description": "Thành phố lớn nhất Việt Nam, trung tâm kinh tế."
-        },
-        {
-            "name": "Đà Nẵng",
-            "lat": 16.054,
-            "lng": 108.202,
-            "description": "Thành phố du lịch nổi tiếng với các bãi biển đẹp."
-        },
-        {
-            "name": "Huế",
-            "lat": 16.462,
-            "lng": 107.589,
-            "description": "Thành phố cổ kính, nổi tiếng với di tích lịch sử và văn hóa."
-        },
-        {
-            "name": "Nha Trang",
-            "lat": 12.238,
-            "lng": 109.196,
-            "description": "Thành phố biển nổi tiếng với bãi biển đẹp và các khu nghỉ dưỡng."
-        }
-    ]
-}
+[
+    {
+        "latitude": 21.0323,
+        "longitude": 105.8007,
+        "potholes": 5
+    },
+    {
+        "latitude": 21.0323,
+        "longitude": 105.8007,
+        "potholes": 5
+    }
+]
